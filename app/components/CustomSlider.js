@@ -22,7 +22,7 @@ export default class CustomSlider extends Component {
     super(props)
     
     this.state = { 
-      pan : new Animated.ValueXY() 
+      pan : new Animated.ValueXY(), 
       scale : new Animated.Value(1)
     }
   }
@@ -30,12 +30,12 @@ export default class CustomSlider extends Component {
     this._panResponder = PanResponder.create({
       onMoveShouldSetResponderCapture : () => true,
       onMoveShouldSetPanResponderCapture : () => true,
-      onPanResponderGran : (evt, gestureState) : () => {
+      onPanResponderGrant : (evt, gestureState) => {
         //*start moving
-    Animated.spring(
-			this.state.scale,
-			{toValue : 1.3, friction : 3}
-		).start() 
+        Animated.spring(
+          this.state.scale,
+          {toValue : 1.3, friction : 3}
+        ).start() 
       }, 
 	  onPanResponderMove: () => {
 		    	Animated.event([
@@ -49,7 +49,7 @@ export default class CustomSlider extends Component {
 			friction : 3
 		  })
 	  }
-    })
+    })  
   }
 
   render () {
@@ -57,7 +57,7 @@ export default class CustomSlider extends Component {
       <View style={styles.mainContainer}>
         <Animated.View style={[styles.draggerView, 
           {transform : [{ scale : this.state.scale}] }]}
-          {...this._panResponde.panHandlers}
+          {...this._panResponderpanHandlers}
           ></Animated.View>
       </View>
     )
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   draggerView : {
     height : '100%',
-    backgroundColor : 'red',
+    backgroundColor : 'steelBlue',
     width : '15%'
   }
 }) 
