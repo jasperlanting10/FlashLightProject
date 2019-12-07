@@ -43,7 +43,7 @@ export default class CustomSlider extends Component {
 		  ])
 	  }
 	  onPanResponderRelease : (evt, gestureState) => {
-    Aninated.spring(this.state.calse,
+    Aninated.spring(this.state.calse, 
 		  {
 			toValue :1,
 			friction : 3
