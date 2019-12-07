@@ -23,7 +23,7 @@ export default class MainScreen extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { 
+        this.state = {
             min: 10,
             max: 300,
         };
