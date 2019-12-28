@@ -13,11 +13,13 @@ import {
     ImageBackground,
     Platform,
     Dimensions,
+    findNodeHandle,
 } from 'react-native';
 import Slider from "react-native-slider";
+import { BlurView } from "@react-native-community/blur";
 
 import backgroundImage from '../assets/images/party.jpg';
-
+import BpmImage from '../assets/images/bpm.png'
 import ButtonComponent from '../components/ButtonComponent.js';
 import CustomSlider from '../components/CustomSlider.js';
 
@@ -34,6 +36,7 @@ export default class MainScreen extends Component {
             min: 10,
             max: 300,
             blinkingSpeed : 1000,
+            viewRef : null
         };
     }
     static navigationOptions = {
@@ -75,22 +78,6 @@ export default class MainScreen extends Component {
     handleBlinking = async () => {
         var blinkingSpeed = this.state.blinkingSpeed
         var blinkBool = true;
-        // const intervalId = setInterval(() => {
-        //     if (RegularLight.getInstance().isTurnedOn) {
-        //         Torch.switchState(blinkBool);
-        //         blinkBool = !blinkBool;
-        //     } else if (blinkingSpeed !== this.state.blinkingSpeed) {
-        //         blinkingSpeed = this.state.blinkingSpeed
-        //     } else {
-        //         console.log('blinking has stopped');
-        //         RegularLight.getInstance().setTurnedOn(false)
-        //         clearInterval(intervalId)
-        //     }
-        //     console.log('blinking speed in loop: ', this.state.blinkingSpeed);
-             
-            
-           
-        // }, blinkingSpeed);
         while (RegularLight.getInstance().isTurnedOn) {
             if (RegularLight.getInstance().isTurnedOn) {
                 Torch.switchState(blinkBool);
@@ -109,53 +96,69 @@ export default class MainScreen extends Component {
     }
 
     changeBlinkingSpeed = (event) => {
-        
-        // console.log('nieuwe aarde: ',newValue);
-        // event.interpolate({
-        //     inputRange: [0, 1],
-        //     outputRange : [900, 100]
-        // })
 
-        this.setState({blinkingSpeed : ((1 - event)* 1000)})
-        // this.handleBlinking()
+        var theVariable = event; // 0 to 1
+        var top = 10;
+        var bottom = 1000;
+        var distance = bottom - top;
+        var position = top + ((theVariable / 1) * distance);
+
+        console.log('position: ', 1000 - position);
+        
+        this.setState({blinkingSpeed  : (1000 - position)})
+
+    }
+
+    viewLoaded(event) {
+        this.setState({ viewRef: findNodeHandle(this.view) });
     }
     render() {
         return (
-            <View style={styles.mainContainer}>
+            <View  style={styles.mainContainer}>
                 <StatusBar hidden={true}/>
-                <Image
-                    source={backgroundImage}
-                    style={{
-                        position: 'absolute',
-                        height: Dimensions.get('window').height,
-                    }}></Image>
-                <View style={styles.backgroundColorStyle}></View>
-                <View
-                    style={{
-                        alignItems: 'center',
-                        alignSelf: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                    }}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            this.onButtonCLick();
+                <BlurView style={styles.absolute} blurType={'light'} blurAmount={10} viewRef={this.state.viewRef}/>
+                <View ref={(view) => {this.view = view}}  onLayout={(event) => {this.viewLoaded(event)}} style={styles.mainContainer}>
+
+                    <Image
+                        source={backgroundImage}
+                        style={{
+                            position: 'absolute',
+                            height: Dimensions.get('window').height,
+                        }}></Image>
+                    <View style={styles.backgroundColorStyle}></View>
+                    <View
+                        style={{
+                            alignItems: 'center',
+                            alignSelf: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
                         }}>
-                        <ButtonComponent />
-                    </TouchableOpacity>
-                    <View>
-                        <Slider
-                            style={{marginTop : 40, width : Dimensions.get('window').width * 0.8}}
-                            trackStyle={sliderStyles.track}
-                            thumbStyle={sliderStyles.thumb}
-                            thumbImage={Torch}
-                            onValueChange={(event) => {this.changeBlinkingSpeed(event)}}
-                            minimumTrackTintColor= 'rgba(100,100,255,1)'
-                            maximumTrackTintColor= 'rgba(200, 200, 200, 0.35)'
-                        />
+                        <TouchableOpacity
+                            onPress={() => {
+                                this.onButtonCLick();
+                            }}>
+                            <ButtonComponent />
+                        </TouchableOpacity>
+                        <View>
+                            <Slider
+                                style={{marginTop : 40, width : Dimensions.get('window').width * 0.8}}
+                                trackStyle={sliderStyles.track}
+                                thumbStyle={sliderStyles.thumb}
+                                thumbImage={Torch}
+                                onValueChange={(event) => {this.changeBlinkingSpeed(event)}}
+                                minimumTrackTintColor= 'rgba(100,100,255,1)'
+                                maximumTrackTintColor= 'rgba(200, 200, 200, 0.35)'
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.speedIconStyleContainer}>
+                        <TouchableOpacity activeOpacity={0.25}>
+                            <Image source={BpmImage} style={{tintColor : 'white', height : 55, width : 55}}/>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
+
         );
     }
 }
@@ -180,8 +183,27 @@ const sliderStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+    absolute: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0
+    },
     mainContainer: {
+        height : '100%',
+        position : 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        resizeMode: 'contain',
         alignItems: 'center',
+    },
+    speedIconStyleContainer : {
+        position : 'absolute',
+        bottom : Dimensions.get('window').width / 15,
+        right : Dimensions.get('window').width / 15,
     },
     bottomSliderContainer: {
         justifyContent: 'space-between',

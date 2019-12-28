@@ -31,11 +31,11 @@ export default class RegularLight {
 
     //* per seconden
     setBlinkingSpeed = newValue => {
-        console.log('hallo: ', newValue);
+        console.log('new Blinking speed mohfokka: ', newValue);
         this.isBlinking = true; 
         
         this.blinkingSpeed = parseInt(newValue);
-        console.log('blinking sepee: ',this.blinkingSpeed);
+        console.log('New blinkingspeed: ',this.blinkingSpeed);
         
     };
 
