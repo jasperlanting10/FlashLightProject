@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import Slider from "react-native-slider";
 import { BlurView } from "@react-native-community/blur";
+import Dialog from "react-native-dialog";
 
 import backgroundImage from '../assets/images/party.jpg';
 import BpmImage from '../assets/images/bpm.png'
@@ -35,8 +36,9 @@ export default class MainScreen extends Component {
         this.state = {
             min: 10,
             max: 300,
-            blinkingSpeed : 1000,
-            viewRef : null
+            blinkingSpeed : 350,
+            viewRef : null,
+            showBPMDialog : false,
         };
     }
     static navigationOptions = {
@@ -87,7 +89,15 @@ export default class MainScreen extends Component {
                 RegularLight.getInstance().setTurnedOn(false)
 
             }
+            // if (this.isFromBeat) {
+            //     await this.sleep(10)
+                
+            //     await this.sleep(10)
+
+            // } else {
+            // }
             await this.sleep(this.state.blinkingSpeed)
+
         }
     };
 
@@ -99,26 +109,87 @@ export default class MainScreen extends Component {
 
         var theVariable = event; // 0 to 1
         var top = 10;
-        var bottom = 1000;
+        var bottom = 350;
         var distance = bottom - top;
         var position = top + ((theVariable / 1) * distance);
-
-        console.log('position: ', 1000 - position);
-        
-        this.setState({blinkingSpeed  : (1000 - position)})
+        this.setState({blinkingSpeed  : (bottom - position)})
 
     }
 
     viewLoaded(event) {
         this.setState({ viewRef: findNodeHandle(this.view) });
     }
+
+
+
+    onBeatPress = () => {
+        if (this.currentBPM === null || this.currentBPM === undefined) {
+            this.currentBPM = []
+            this.currentBPM[0] = new Date().getTime()
+        } else {
+            console.log('kom jke heir in? ',this.currentBPM.length);
+            
+            this.currentBPM[this.currentBPM.length] = new Date().getTime()
+        }
+    }
+
+    onSavePress = () => {
+        var totalTime = 0
+        for (var i = 0; i < this.currentBPM.length; i++) {
+            if (i !== this.currentBPM.length - 1) {
+                totalTime = totalTime + (this.currentBPM[i + 1] - this.currentBPM[i])
+                
+            }
+        }
+        console.log('total time : ',totalTime / this.currentBPM.length);
+        const newSpeed = totalTime / this.currentBPM.length;
+        this.setState({blinkingSpeed : (newSpeed), showBPMDialog : false,})
+        this.currentBPM = undefined
+        this.isFromBeat = true
+        
+        //elke time stamp t verschil tussen meten en dan het gemiddelde berekenen
+    }
+
+    onDeletePress = () => {
+        this.currentBPM = undefined
+        this.setState({showBPMDialog : false})
+    }
+
     render() {
         return (
             <View  style={styles.mainContainer}>
                 <StatusBar hidden={true}/>
                 <BlurView style={styles.absolute} blurType={'light'} blurAmount={10} viewRef={this.state.viewRef}/>
                 <View ref={(view) => {this.view = view}}  onLayout={(event) => {this.viewLoaded(event)}} style={styles.mainContainer}>
+                
+                    <Dialog.Container style={{marginHorizontal : 12}} visible={this.state.showBPMDialog} onOutsideTouch={() => {this.setState({showBPMDialog : false})}}>
+                            <Dialog.Title>Adjust BPM</Dialog.Title>
+                            <Dialog.Description>
+                                To change the blinking speed to the current BPM, tap the field below on the beat!
+                            </Dialog.Description>
 
+                            <TouchableOpacity onPress={() => {this.onBeatPress()}} style={{backgroundColor : 'rgba(100,100,255,0.15)', borderRadius: 6, marginHorizontal : 12, height : 250, width : 250, borderWidth : 1, borderColor : 'rgba(100,100,255,1)'}}>
+                                <View></View>
+                            </TouchableOpacity>
+
+
+                            <View style={{marginTop : 24, flexDirection : 'row', width : Dimensions.get('screen').width * 0.8}}>
+                                <TouchableOpacity style={{justifyContent : 'center', borderRadius : 5, backgroundColor : 'rgba(100,100,255,1)', flex : 1, height : 46,}} onPress={() => {this.onDeletePress()}}>
+                                    <View style={{justifyContent : 'center', borderRadius : 5, backgroundColor : 'rgba(100,100,255,1)', flex : 1,}}>
+                                        <Text style={{padding : 12, alignSelf : 'center', fontWeight : Platform.OS  ==='ios'? '600': 'bold', color : 'white'}}>DELETE</Text>
+                                    </View>
+                                </TouchableOpacity>
+    
+                                <View style={{flex : 0.1}}/>
+                                <TouchableOpacity style={{justifyContent : 'center', borderRadius : 5, backgroundColor : 'rgba(100,100,255,1)', flex : 1,}} onPress={() => {this.onSavePress()}}>
+                                    <View style={{justifyContent : 'center', borderRadius : 5, backgroundColor : 'rgba(100,100,255,1)', flex : 1,}}>
+                                        <Text style={{padding : 12, alignSelf : 'center', fontWeight : Platform.OS  ==='ios'? '600': 'bold', color : 'white'}}>ADD</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+
+                    </Dialog.Container>
+                    
                     <Image
                         source={backgroundImage}
                         style={{
@@ -145,14 +216,17 @@ export default class MainScreen extends Component {
                                 trackStyle={sliderStyles.track}
                                 thumbStyle={sliderStyles.thumb}
                                 thumbImage={Torch}
-                                onValueChange={(event) => {this.changeBlinkingSpeed(event)}}
+                                onValueChange={(event) => {
+                                        this.changeBlinkingSpeed(event)
+                                        this.isFromBeat = false
+                                    }}
                                 minimumTrackTintColor= 'rgba(100,100,255,1)'
                                 maximumTrackTintColor= 'rgba(200, 200, 200, 0.35)'
                             />
                         </View>
                     </View>
                     <View style={styles.speedIconStyleContainer}>
-                        <TouchableOpacity activeOpacity={0.25}>
+                        <TouchableOpacity onPress={() => {this.setState({showBPMDialog : true})} } activeOpacity={0.25}>
                             <Image source={BpmImage} style={{tintColor : 'white', height : 55, width : 55}}/>
                         </TouchableOpacity>
                     </View>
