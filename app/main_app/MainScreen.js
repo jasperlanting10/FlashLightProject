@@ -81,24 +81,24 @@ export default class MainScreen extends Component {
         var blinkingSpeed = this.state.blinkingSpeed
         var blinkBool = true;
         while (RegularLight.getInstance().isTurnedOn) {
-            if (RegularLight.getInstance().isTurnedOn) {
-                Torch.switchState(blinkBool);
-                blinkBool = !blinkBool;
-            } else {
-                console.log('blinking has stopped');
-                RegularLight.getInstance().setTurnedOn(false)
-
-            }
-            // if (this.isFromBeat) {
-            //     await this.sleep(10)
-                
-            //     await this.sleep(10)
-
+            Torch.switchState(true);
+            await this.sleep(10)
+            blinkBool = !blinkBool
+            Torch.switchState(false)
+            
+            // if (RegularLight.getInstance().isTurnedOn) {
+            //     Torch.switchState(blinkBool);
+            //     blinkBool = !blinkBool;
             // } else {
+            //     console.log('blinking has stopped');
+            //     RegularLight.getInstance().setTurnedOn(false)
+
             // }
+            
             await this.sleep(this.state.blinkingSpeed)
 
         }
+        Torch.switchState(false)
     };
 
     sleep(ms) {
@@ -106,7 +106,6 @@ export default class MainScreen extends Component {
     }
 
     changeBlinkingSpeed = (event) => {
-
         var theVariable = event; // 0 to 1
         var top = 10;
         var bottom = 350;
